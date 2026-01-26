@@ -5,6 +5,9 @@ import {
   Droppable,
 } from "@hello-pangea/dnd";
 import Column from "../components/Column.jsx";
+import AddTaskModal from "../components/AddTaskModal.jsx";
+import Trash from "../components/Trash.jsx";
+import Header from "../components/Header.jsx";
 
 const initialColumnData = {
   "pending": {
@@ -24,26 +27,72 @@ const initialColumnData = {
   },
 };
 
-const items = {
-  "item-1": { id: "item-1", title: "Item 1" },
-  "item-2": { id: "item-2", title: "Item 2" },
-  "item-3": { id: "item-3", title: "Item 3" },
-  "item-4": { id: "item-4", title: "Item 4" },
-  "item-5": { id: "item-5", title: "Item 5" },
-  "item-6": { id: "item-6", title: "Item 6" },
-  "item-7": { id: "item-7", title: "Item 7" },
-  "item-8": { id: "item-8", title: "Item 8" },
+const initialItems = {
+  "item-1": { id: "item-1", title: "Item 1", description: "" },
+  "item-2": { id: "item-2", title: "Item 2", description: "" },
+  "item-3": { id: "item-3", title: "Item 3", description: "" },
+  "item-4": { id: "item-4", title: "Item 4", description: "" },
+  "item-5": { id: "item-5", title: "Item 5", description: "" },
+  "item-6": { id: "item-6", title: "Item 6", description: "" },
+  "item-7": { id: "item-7", title: "Item 7", description: "" },
+  "item-8": { id: "item-8", title: "Item 8", description: "" },
 };
 
 function Home() {
   const [columnsOrder, setColumnsOrder] = useState(["pending", "in_progress", "completed"]);
   const [data, setData] = useState(initialColumnData);
+  const [items, setItems] = useState(initialItems);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedColumnId, setSelectedColumnId] = useState(null);
+
+  const handleOpenModal = (columnId) => {
+    setSelectedColumnId(columnId);
+    setIsModalOpen(true);
+  };
+
+  const handleAddTask = (columnId, { title, description }) => {
+    const newItemId = `item-${Date.now()}`;
+    
+    setItems((prev) => ({
+      ...prev,
+      [newItemId]: {
+        id: newItemId,
+        title,
+        description,
+      },
+    }));
+
+    setData((prev) => ({
+      ...prev,
+      [columnId]: {
+        ...prev[columnId],
+        itemsOrder: [...prev[columnId].itemsOrder, newItemId],
+      },
+    }));
+  };
 
   const handleDragDrop = (results) => {
-    const { source, destination, type } = results;
+    const { source, destination, type, draggableId } = results;
 
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    if (destination.droppableId === "trash") {
+      const sourceColId = source.droppableId;
+      setData((prev) => ({
+        ...prev,
+        [sourceColId]: {
+          ...prev[sourceColId],
+          itemsOrder: prev[sourceColId].itemsOrder.filter((id) => id !== draggableId),
+        },
+      }));
+      setItems((prev) => {
+        const newItems = { ...prev };
+        delete newItems[draggableId];
+        return newItems;
+      });
+      return;
+    }
 
     const sourceIndex = source.index;
     const destinationIndex = destination.index;
@@ -55,36 +104,54 @@ function Home() {
       setColumnsOrder(reorderedColumns);
     } else {
       if (source.droppableId === destination.droppableId) {
-        const source_col_id = source.droppableId;
-        const new_items_id_collection = [...data[source_col_id].itemsOrder];
-        const [deleted_item_id] = new_items_id_collection.splice(sourceIndex, 1);
-        new_items_id_collection.splice(destinationIndex, 0, deleted_item_id);
-        const new_data = { ...data };
-        new_data[source_col_id].itemsOrder = new_items_id_collection;
-        setData(new_data);
+        const sourceColId = source.droppableId;
+        const newItemsOrder = [...data[sourceColId].itemsOrder];
+        const [deletedItemId] = newItemsOrder.splice(sourceIndex, 1);
+        newItemsOrder.splice(destinationIndex, 0, deletedItemId);
+        
+        setData((prev) => ({
+          ...prev,
+          [sourceColId]: {
+            ...prev[sourceColId],
+            itemsOrder: newItemsOrder,
+          },
+        }));
       } else {
-        const source_col_id = source.droppableId;
-        const dest_col_id = destination.droppableId;
-        const new_source_items_id_collc = [...data[source_col_id].itemsOrder];
-        const new_dest_items_id_collc = [...data[dest_col_id].itemsOrder];
-        const [deleted_item_id] = new_source_items_id_collc.splice(sourceIndex, 1);
-        new_dest_items_id_collc.splice(destinationIndex, 0, deleted_item_id);
-        const new_data = { ...data };
-        new_data[source_col_id].itemsOrder = new_source_items_id_collc;
-        new_data[dest_col_id].itemsOrder = new_dest_items_id_collc;
-        setData(new_data);
+        const sourceColId = source.droppableId;
+        const destColId = destination.droppableId;
+        
+        const sourceItemsOrder = [...data[sourceColId].itemsOrder];
+        const destItemsOrder = [...data[destColId].itemsOrder];
+        
+        const [deletedItemId] = sourceItemsOrder.splice(sourceIndex, 1);
+        destItemsOrder.splice(destinationIndex, 0, deletedItemId);
+
+        setData((prev) => ({
+          ...prev,
+          [sourceColId]: {
+            ...prev[sourceColId],
+            itemsOrder: sourceItemsOrder,
+          },
+          [destColId]: {
+            ...prev[destColId],
+            itemsOrder: destItemsOrder,
+          },
+        }));
       }
     }
   };
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Quadro de Tarefas</h1>
-        <p className="text-gray-400 mb-8">Arraste as colunas e cartões para reorganizar</p>
+    <div>
+      <Header />
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Quadro de Tarefas (Público)</h1>
+          <p className="text-gray-400">Arraste as colunas e cartões para reorganizar</p>
+        </div>
 
         <DragDropContext onDragEnd={handleDragDrop}>
-          <Droppable droppableId="root" type="column" direction="HORIZONTAL">
+          <Droppable droppableId="root" type="column" direction="horizontal">
             {(provided) => (
               <div
                 className="flex gap-4 pb-4 overflow-x-auto lg:overflow-x-visible"
@@ -103,7 +170,7 @@ function Home() {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="flex-shrink-0 w-full sm:w-80"
+                          className="flex-shrink-0 w-80"
                         >
                           <div
                             className={`rounded-lg overflow-hidden shadow-lg transition-all ${snapshot.isDragging ? "ring-2 ring-blue-500 shadow-xl" : ""
@@ -121,7 +188,11 @@ function Home() {
                               </span>
                             </div>
 
-                            <Column {...columnData} items={items} />
+                            <Column 
+                              {...columnData} 
+                              items={items} 
+                              onAddTaskClick={handleOpenModal}
+                            />
                           </div>
                         </div>
                       )}
@@ -132,8 +203,19 @@ function Home() {
               </div>
             )}
           </Droppable>
+
+          <div className="mt-8 flex justify-center">
+            <Trash />
+          </div>
         </DragDropContext>
       </div>
+
+      <AddTaskModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddTask={handleAddTask}
+        columnId={selectedColumnId}
+      />
     </div>
   );
 }

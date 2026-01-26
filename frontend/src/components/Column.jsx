@@ -1,15 +1,24 @@
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import Card from "./Card";
+import { PlusIcon } from "lucide-react";
 
-function Column({ itemsOrder, id, items }) {
+function Column({ itemsOrder, id, items, onAddTaskClick }) {
   return (
     <Droppable droppableId={id}>
       {(provided) => (
         <div
-          {...provided.draggableProps}
+          {...provided.droppableProps}
           ref={provided.innerRef}
-          className="flex flex-col w-full min-h-60 h-fit max-h-[60vh] overflow-y-auto"
+          className="flex flex-col w-full h-fit max-h-[60vh] overflow-y-auto"
         >
+          <button
+            type="button"
+            onClick={() => onAddTaskClick(id)}
+            className="border-b rounded-md p-2 m-2 mt-4 bg-blue-600 hover:bg-blue-700 text-center transition-colors cursor-pointer"
+          >
+            <PlusIcon className="w-6 h-6 mx-auto text-white" />
+          </button>
+
           {itemsOrder.map((item_id, index) => {
             const item = items[item_id];
 
