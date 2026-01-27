@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 from ..database.database import load_data, save_data, USERS_FILE
 from ..models import RegisterFormModel, LoginFormModel
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

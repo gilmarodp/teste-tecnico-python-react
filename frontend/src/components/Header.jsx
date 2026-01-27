@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import Cookies from 'js-cookie';
 
-export default function Header() {
+export default function Header({ onLogout }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (Cookies.get('token')) {
+      setIsLoggedIn(true);
+      setUserName(Cookies.get('user_name') || 'Usuário');
+    } else {
+      setIsLoggedIn(false);
+      setUserName('');
+    }
+  }, []);
 
   const handleLogin = () => {
     navigate('/login');
@@ -18,6 +29,13 @@ export default function Header() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserName('');
+
+    Cookies.remove('token');
+    Cookies.remove('user_name');
+
+    onLogout();
+
+    navigate('/');
   };
 
   return (

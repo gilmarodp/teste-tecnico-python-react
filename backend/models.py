@@ -18,7 +18,7 @@ class UserModel(BaseModel):
     email: str
 
 class TaskModel(BaseModel):
-    title: str
+    title: str = None
     description: str = None
-    status: Literal["pending", "in_progress", "completed"]
+    status: Optional[Literal["pending", "in_progress", "completed"]] = None
     user_id: Optional[str] = None

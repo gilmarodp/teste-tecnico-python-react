@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DragDropContext,
   Draggable,
@@ -8,42 +8,109 @@ import Column from "../components/Column.jsx";
 import AddTaskModal from "../components/AddTaskModal.jsx";
 import Trash from "../components/Trash.jsx";
 import Header from "../components/Header.jsx";
+import api from '../services/api';
 
 const initialColumnData = {
   "pending": {
     id: "pending",
     title: "Pendente",
-    itemsOrder: ["item-1", "item-2", "item-3"],
+    itemsOrder: [],
   },
   "in_progress": {
     id: "in_progress",
     title: "Em Progresso",
-    itemsOrder: ["item-4", "item-5"],
+    itemsOrder: [],
   },
   "completed": {
     id: "completed",
     title: "Concluído",
-    itemsOrder: ["item-6", "item-7", "item-8"],
+    itemsOrder: [],
   },
 };
 
-const initialItems = {
-  "item-1": { id: "item-1", title: "Item 1", description: "" },
-  "item-2": { id: "item-2", title: "Item 2", description: "" },
-  "item-3": { id: "item-3", title: "Item 3", description: "" },
-  "item-4": { id: "item-4", title: "Item 4", description: "" },
-  "item-5": { id: "item-5", title: "Item 5", description: "" },
-  "item-6": { id: "item-6", title: "Item 6", description: "" },
-  "item-7": { id: "item-7", title: "Item 7", description: "" },
-  "item-8": { id: "item-8", title: "Item 8", description: "" },
-};
+const fetchTasks = async () => {
+  try {
+    const response = await api.get('/tasks');
+
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter tarefas da API:', error);
+  }
+}
+
+const addTask = async (task) => {
+  try {
+    const response = await api.post('/tasks', task, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao adicionar tarefa na API:', error);
+  }
+}
+
+const updateTask = async (taskId, task) => {
+  try {
+    const response = await api.put(`/tasks/${taskId}`, task, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar tarefa na API:', error);
+  }
+}
+
+const deleteTask = async (taskId) => {
+  try {
+    await api.delete(`/tasks/${taskId}`);
+  } catch (error) {
+    console.error('Erro ao deletar tarefa da API:', error);
+  }
+}
 
 function Home() {
   const [columnsOrder, setColumnsOrder] = useState(["pending", "in_progress", "completed"]);
   const [data, setData] = useState(initialColumnData);
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(null);
+
+  const loadTasksData = () => {
+    fetchTasks()
+      .then((tasks) => {
+        const newItemsMap = {};
+        const newColumnsData = {
+            "pending": { ...initialColumnData.pending, itemsOrder: [] },
+            "in_progress": { ...initialColumnData.in_progress, itemsOrder: [] },
+            "completed": { ...initialColumnData.completed, itemsOrder: [] },
+        };
+
+        tasks.forEach((task) => {
+          newItemsMap[task.id] = {
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+          };
+
+          if (newColumnsData[task.status]) {
+            newColumnsData[task.status].itemsOrder.push(task.id);
+          }
+        });
+
+        setItems(newItemsMap);
+        setData(newColumnsData);
+      });
+  };
+
+  useEffect(() => {
+    loadTasksData();
+  }, []);
 
   const handleOpenModal = (columnId) => {
     setSelectedColumnId(columnId);
@@ -51,24 +118,33 @@ function Home() {
   };
 
   const handleAddTask = (columnId, { title, description }) => {
-    const newItemId = `item-${Date.now()}`;
-    
-    setItems((prev) => ({
-      ...prev,
-      [newItemId]: {
-        id: newItemId,
-        title,
-        description,
-      },
-    }));
+    addTask({
+      title,
+      description,
+      status: columnId,
+    })
+      .then((task) => {
+        setItems((prev) => ({
+          ...prev,
+          [task.id]: {
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+          },
+        }));
 
-    setData((prev) => ({
-      ...prev,
-      [columnId]: {
-        ...prev[columnId],
-        itemsOrder: [...prev[columnId].itemsOrder, newItemId],
-      },
-    }));
+        setData((prev) => ({
+          ...prev,
+          [columnId]: {
+            ...prev[columnId],
+            itemsOrder: [...prev[columnId].itemsOrder, task.id],
+          },
+        }));
+      })
+      .catch((error) => {
+        console.error('Erro ao adicionar tarefa na API:', error);
+      })
   };
 
   const handleDragDrop = (results) => {
@@ -91,6 +167,12 @@ function Home() {
         delete newItems[draggableId];
         return newItems;
       });
+
+      deleteTask(draggableId)
+        .catch((error) => {
+          console.error('Erro ao deletar tarefa da API:', error);
+        });
+
       return;
     }
 
@@ -126,6 +208,17 @@ function Home() {
         const [deletedItemId] = sourceItemsOrder.splice(sourceIndex, 1);
         destItemsOrder.splice(destinationIndex, 0, deletedItemId);
 
+        let task = items[draggableId];
+        task = {
+          ...task,
+          status: destColId,
+        };
+
+        updateTask(draggableId, task)
+          .catch((error) => {
+            console.error('Erro ao atualizar tarefa na API:', error);
+          });
+
         setData((prev) => ({
           ...prev,
           [sourceColId]: {
@@ -143,7 +236,7 @@ function Home() {
 
   return (
     <div>
-      <Header />
+      <Header onLogout={loadTasksData} />
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Quadro de Tarefas (Público)</h1>
