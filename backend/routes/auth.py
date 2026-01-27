@@ -80,4 +80,8 @@ def login(data: Annotated[LoginFormModel, Form()]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = create_access_token(data={"sub": user["email"], "id": user["id"]})
-    return {"access_token": access_token, "token_type": "Bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "Bearer",
+        "user_name": user["name"],
+    }
