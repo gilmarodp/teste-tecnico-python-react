@@ -1,4 +1,5 @@
-from typing import Literal
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field, EmailStr
 
 class RegisterFormModel(BaseModel):
@@ -20,3 +21,4 @@ class TaskModel(BaseModel):
     title: str
     description: str = None
     status: Literal["pending", "in_progress", "completed"]
+    user_id: Optional[str] = None

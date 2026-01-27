@@ -4,7 +4,7 @@ import bcrypt
 from typing import Annotated
 from dotenv import load_dotenv
 from fastapi import APIRouter, Form, HTTPException
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 from passlib.context import CryptContext
 from ..database.database import load_data, save_data, USERS_FILE
@@ -17,7 +17,6 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(password: str) -> str:
     pwd_bytes = password.encode('utf-8')
@@ -36,7 +35,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(tz=timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -72,7 +71,6 @@ async def register(data: Annotated[RegisterFormModel, Form()]):
             "email": new_user["email"],
         },
     }
-
 
 @auth_router.post("/login")
 def login(data: Annotated[LoginFormModel, Form()]):
