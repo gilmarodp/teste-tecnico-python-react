@@ -30,7 +30,7 @@ Possui uma área pública de gestão de tarefas (Kanban) e uma área privada de 
 # Como Instalar e Rodar (Docker ou Localmente)
 
 ## Requisitos
-- Python 3.14+
+- Python 3.12+
 - Node 20+
 - npm
 
