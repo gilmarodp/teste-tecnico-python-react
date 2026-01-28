@@ -4,17 +4,28 @@ O sistema e um simples gerenciador de tarefas com autenticação via JWT.
 
 Possui uma área pública de gestão de tarefas (Kanban) e uma área privada de usuário.
 
-### Uso do Kanban Público
+<table>
+<tr>
+<td valign="top">
+
+### Uso do Kanban Público  
 ![Kanban Example](./docs/kanban-example.gif)
 
-### Tela de Login
+### Tela de Login  
 ![Login Example](./docs/login-example.png)
 
-### Tela de Registro
+</td>
+<td valign="top">
+
+### Tela de Registro  
 ![Register Example](./docs/register-example.png)
 
-### Uso do Kanban Privado
+### Uso do Kanban Privado  
 ![Private Kanban Example](./docs/private-kanban-example.png)
+
+</td>
+</tr>
+</table>
 
 # Como Instalar e Rodar (Docker ou Localmente)
 
