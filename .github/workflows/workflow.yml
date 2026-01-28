@@ -34,4 +34,4 @@ jobs:
         run: ssh ssh-production 'cd ${{ vars.PATH }} && git reset --hard && git pull origin main'
 
       - name: Deploy with Docker Compose
-        run: ssh ssh-production 'cd ${{ vars.PATH }} && docker-compose down && docker-compose up -d --build'
+        run: ssh ssh-production 'cd ${{ vars.PATH }} && docker-compose down && docker-compose build --no-cache && docker-compose up -d'
