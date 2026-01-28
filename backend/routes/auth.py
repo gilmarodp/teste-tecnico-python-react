@@ -63,8 +63,12 @@ async def register(data: Annotated[RegisterFormModel, Form()]):
 
     save_data(USERS_FILE, users)
 
+    access_token = create_access_token(data={"sub": new_user["email"], "id": new_user["id"]})
+
     return {
         "message": "User registered successfully",
+        "access_token": access_token,
+        "token_type": "Bearer",
         "user": {
             "id": new_user["id"],
             "name": new_user["name"],
@@ -81,6 +85,7 @@ def login(data: Annotated[LoginFormModel, Form()]):
 
     access_token = create_access_token(data={"sub": user["email"], "id": user["id"]})
     return {
+        "message": "Login successful",
         "access_token": access_token,
         "token_type": "Bearer",
         "user_name": user["name"],
