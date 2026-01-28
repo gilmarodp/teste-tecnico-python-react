@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000',
+    baseURL: import.meta.env.VITE_BACKEND_URL || '/api',
 });
 
 api.interceptors.request.use((config) => {
