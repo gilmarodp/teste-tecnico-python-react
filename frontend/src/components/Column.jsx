@@ -2,7 +2,7 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import Card from "./Card";
 import { PlusIcon } from "lucide-react";
 
-function Column({ itemsOrder, id, items, onAddTaskClick }) {
+function Column({ itemsOrder, id, items, onAddTaskClick, onCardClick }) {
   return (
     <Droppable droppableId={id}>
       {(provided) => (
@@ -30,6 +30,7 @@ function Column({ itemsOrder, id, items, onAddTaskClick }) {
                     {...provided.draggableProps}
                     ref={provided.innerRef}
                     item={item}
+                    onClick={() => onCardClick(item)}
                   />
                 )}
               </Draggable>

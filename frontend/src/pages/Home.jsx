@@ -6,6 +6,7 @@ import {
 } from "@hello-pangea/dnd";
 import Column from "../components/Column.jsx";
 import AddTaskModal from "../components/AddTaskModal.jsx";
+import EditTaskModal from "../components/EditTaskModal.jsx";
 import Trash from "../components/Trash.jsx";
 import Header from "../components/Header.jsx";
 import api from '../services/api';
@@ -77,8 +78,10 @@ function Home() {
   const [columnsOrder, setColumnsOrder] = useState(["pending", "in_progress", "completed"]);
   const [data, setData] = useState(initialColumnData);
   const [items, setItems] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const loadTasksData = () => {
     fetchTasks()
@@ -112,9 +115,14 @@ function Home() {
     loadTasksData();
   }, []);
 
-  const handleOpenModal = (columnId) => {
+  const handleOpenAddModal = (columnId) => {
     setSelectedColumnId(columnId);
-    setIsModalOpen(true);
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenEditModal = (task) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
   };
 
   const handleAddTask = (columnId, { title, description }) => {
@@ -145,6 +153,26 @@ function Home() {
       .catch((error) => {
         console.error('Erro ao adicionar tarefa na API:', error);
       })
+  };
+
+  const handleUpdateTask = (taskId, { title, description }) => {
+    const taskToUpdate = items[taskId];
+    const updatedTaskData = { ...taskToUpdate, title, description };
+
+    updateTask(taskId, updatedTaskData)
+      .then((updatedTask) => {
+        setItems((prev) => ({
+          ...prev,
+          [taskId]: {
+            ...prev[taskId],
+            title: updatedTask.title,
+            description: updatedTask.description,
+          },
+        }));
+      })
+      .catch((error) => {
+        console.error('Erro ao atualizar tarefa na API:', error);
+      });
   };
 
   const handleDragDrop = (results) => {
@@ -284,7 +312,8 @@ function Home() {
                             <Column 
                               {...columnData} 
                               items={items} 
-                              onAddTaskClick={handleOpenModal}
+                              onAddTaskClick={handleOpenAddModal}
+                              onCardClick={handleOpenEditModal}
                             />
                           </div>
                         </div>
@@ -304,10 +333,17 @@ function Home() {
       </div>
 
       <AddTaskModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
         onAddTask={handleAddTask}
         columnId={selectedColumnId}
+      />
+
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleUpdateTask}
+        task={selectedTask}
       />
     </div>
   );
