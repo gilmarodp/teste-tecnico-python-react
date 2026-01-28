@@ -11,14 +11,14 @@ Possui uma área pública de gestão de tarefas (Kanban) e uma área privada de 
 ### Uso do Kanban Público  
 ![Kanban Example](./docs/kanban-example.gif)
 
-### Tela de Login  
-![Login Example](./docs/login-example.png)
+### Tela de Registro  
+![Register Example](./docs/register-example.png)
 
 </td>
 <td valign="top">
 
-### Tela de Registro  
-![Register Example](./docs/register-example.png)
+### Tela de Login  
+![Login Example](./docs/login-example.png)
 
 ### Uso do Kanban Privado  
 ![Private Kanban Example](./docs/private-kanban-example.png)
