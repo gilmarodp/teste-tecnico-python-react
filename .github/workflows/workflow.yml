@@ -33,5 +33,5 @@ jobs:
       - name: Git pull
         run: ssh ssh-production 'cd ${{ vars.PATH }} && git reset --hard && git pull origin main'
 
-      - name: Composer Install
+      - name: Deploy with Docker Compose
         run: ssh ssh-production 'cd ${{ vars.PATH }} && docker-compose down && docker-compose up -d --build'

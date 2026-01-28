@@ -38,6 +38,12 @@ Possui uma área pública de gestão de tarefas (Kanban) e uma área privada de 
 - `backend/` (Python - FastAPI)
 - `frontend/` (React + Vite)
 
+Primeiramente clone o repositorio:
+```bash
+git clone https://github.com/gilmarodp/teste-tecnico-python-react.git
+cd teste-tecnico-python-react
+```
+
 ## Rodar com Docker Compose
 ```bash
 docker-compose up -d --build
@@ -69,7 +75,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-PYTHONPATH=. fastapi run app/main.py --host 0.0.0.0 --port 8000 --reload
+fastapi run app/main.py --host localhost --port 8000 --reload
 ```
 
 ## Rodar o frontend (dev)
