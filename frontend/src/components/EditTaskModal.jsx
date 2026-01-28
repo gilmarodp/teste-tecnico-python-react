@@ -22,14 +22,8 @@ export default function EditTaskModal({ isOpen, onClose, onSave, task }) {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/95"
-      onClick={onClose} // Fecha o modal ao clicar no fundo
-    >
-      <div
-        className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md"
-        onClick={(e) => e.stopPropagation()} // Impede que o clique dentro do modal o feche
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/95">
+      <div className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">Editar Tarefa</h2>
           <button

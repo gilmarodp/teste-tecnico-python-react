@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { EyeIcon, EyeClosedIcon } from 'lucide-react';
+import Cookies from 'js-cookie';
+import api from '../../services/api';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -9,18 +11,59 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Register:', { name, email, password, confirmPassword });
+        setError('');
+        setLoading(true);
+
+        if (password !== confirmPassword) {
+            setError("As senhas não coincidem.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('confirm_password', confirmPassword);
+
+            const response = await api.post('/auth/register', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
+            const { access_token, user } = response.data;
+
+            Cookies.set('token', access_token, { expires: 2/24 });
+            Cookies.set('user_name', user.name, { expires: 2/24 });
+
+            navigate('/');
+        } catch (err) {
+            setError(err.response?.data?.detail || 'Falha ao realizar o cadastro.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-slate-900">
             <div className="w-full max-w-md p-8 bg-slate-800 rounded-lg shadow-md">
                 <h1 className="text-3xl font-bold text-center mb-6 text-white">Cadastrar</h1>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500 rounded text-red-500 text-sm">
+                        {error}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -102,9 +145,13 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        className="w-full py-2 mt-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                        disabled={loading}
+                        className={`w-full py-2 mt-6 font-semibold rounded-lg transition cursor-pointer 
+                            ${loading 
+                                ? 'bg-blue-800 text-gray-300 cursor-not-allowed' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                     >
-                        Cadastrar
+                        {loading ? 'Cadastrando...' : 'Cadastrar'}
                     </button>
                 </form>
 

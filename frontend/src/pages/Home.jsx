@@ -4,6 +4,7 @@ import {
   Draggable,
   Droppable,
 } from "@hello-pangea/dnd";
+import Cookies from 'js-cookie';
 import Column from "../components/Column.jsx";
 import AddTaskModal from "../components/AddTaskModal.jsx";
 import EditTaskModal from "../components/EditTaskModal.jsx";
@@ -82,6 +83,8 @@ function Home() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get('token'));
+  const [userName, setUserName] = useState(Cookies.get('user_name') || '');
 
   const loadTasksData = () => {
     fetchTasks()
@@ -110,6 +113,13 @@ function Home() {
         setData(newColumnsData);
       });
   };
+
+  const onLogout = () => {
+    loadTasksData();
+
+    setIsLoggedIn(false);
+    setUserName(null);
+  }
 
   useEffect(() => {
     loadTasksData();
@@ -264,10 +274,13 @@ function Home() {
 
   return (
     <div>
-      <Header onLogout={loadTasksData} />
+      <Header onLogout={onLogout} />
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Quadro de Tarefas (Público)</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            Quadro de Tarefas
+            {isLoggedIn && userName ? ` - ${userName}` : ' (Público)'}
+          </h1>
           <p className="text-gray-400">Arraste as colunas e cartões para reorganizar</p>
         </div>
 
