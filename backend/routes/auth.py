@@ -7,14 +7,14 @@ from fastapi import APIRouter, Form, HTTPException
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from passlib.context import CryptContext
-from ..database.database import load_data, save_data, USERS_FILE
-from ..models import RegisterFormModel, LoginFormModel
+from database.database import load_data, save_data, USERS_FILE
+from app.models import RegisterFormModel, LoginFormModel
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+SECRET_KEY = os.getenv("SECRET_KEY", "sua_chave_secreta_aqui")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

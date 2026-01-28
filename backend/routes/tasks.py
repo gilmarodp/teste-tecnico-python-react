@@ -6,13 +6,13 @@ from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Form, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from ..models import TaskModel
-from ..database.database import load_data, save_data, TASKS_FILE
+from app.models import TaskModel
+from database.database import load_data, save_data, TASKS_FILE
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+SECRET_KEY = os.getenv("SECRET_KEY", "sua_chave_secreta_aqui")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 security = HTTPBearer(auto_error=False)
 

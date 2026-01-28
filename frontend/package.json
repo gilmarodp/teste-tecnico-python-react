@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "env-cmd -f ../.env vite",
-    "build": "env-cmd -f ../.env vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
